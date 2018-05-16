@@ -75,3 +75,12 @@ local.properties
 #
 # ==================
 
+/CMakeFiles/CMakeOutput.log
+/.idea/workspace.xml
+/CMakeFiles/3.11.1/CMakeSystem.cmake
+/CMakeCache.txt
+/.idea/modules.xml
+/.idea/misc.xml
+/CMakeFiles/cmake.check_cache
+/.idea/azerothcore.iml
+/.idea/vcs.xml
