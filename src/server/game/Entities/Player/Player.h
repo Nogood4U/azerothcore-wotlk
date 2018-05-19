@@ -136,6 +136,14 @@ struct SpellCooldown
 typedef std::map<uint32, SpellCooldown> SpellCooldowns;
 typedef UNORDERED_MAP<uint32 /*instanceId*/, time_t/*releaseTime*/> InstanceTimeMap;
 
+struct ReforgeData
+{
+    uint32 increase, decrease;
+    int32 stat_value;
+};
+
+
+ 
 enum TrainerSpellState
 {
     TRAINER_SPELL_GREEN = 0,
@@ -1075,12 +1083,12 @@ private:
     bool _isBattleGround;
     bool _isPvP;
 };
-
+typedef std::unordered_map<uint32, ReforgeData> ReforgeMapType;
 class Player : public Unit, public GridObject<Player>
 {
     friend class WorldSession;
     friend void Item::AddToUpdateQueueOf(Player* player);
-    friend void Item::RemoveFromUpdateQueueOf(Player* player);
+    friend void Item::RemoveFromUpdateQueueOf(Player* player);	
     public:
         explicit Player(WorldSession* session);
         ~Player();
@@ -1176,7 +1184,7 @@ class Player : public Unit, public GridObject<Player>
         void GiveLevel(uint8 level);
 
         void InitStatsForLevel(bool reapplyMods = false);
-
+		ReforgeMapType reforgeMap; // reforgeMap[iGUID] = ReforgeData
         // Played Time Stuff
         time_t m_logintime;
         time_t m_Last_tick;
