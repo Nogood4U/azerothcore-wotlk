@@ -161,10 +161,13 @@ static void UpdatePlayerReforgeStats(Item* invItem, Player* player, uint32 decre
     data.stat_value = stat_diff;
     if (invItem->IsEquipped())
         player->_ApplyItemMods(invItem, invItem->GetSlot(), true);
-    // CharacterDatabase.PExecute("REPLACE INTO `custom_reforging` (`GUID`, `increase`, `decrease`, `stat_value`) VALUES (%u, %u, %u, %i)", guidlow, increase, decrease, stat_diff);
-    player->ModifyMoney(pProto->SellPrice < (10 * GOLD) ? (-10 * GOLD) : -(int32)pProto->SellPrice);
+	SQLTransaction trans = CharacterDatabase.BeginTransaction();
+	trans->PAppend("INSERT INTO `custom_reforging` (`GUID`, `increase`, `decrease`, `stat_value` , `Owner`) VALUES (%u, %u, %u, %i , %u)", guidlow, increase, decrease, stat_diff,player->GetGUIDLow());
+	  if (trans->GetSize()) // basically never false
+	CharacterDatabase.CommitTransaction(trans);
+	player->ModifyMoney(pProto->SellPrice < (10 * GOLD) ? (-10 * GOLD) : -(int32)pProto->SellPrice);
     SendReforgePacket(player, invItem->GetEntry(), 0, &data);
-    // player->SaveToDB();
+    //player->SaveToDB();
 }
 
 class REFORGE_PLAYER : public PlayerScript
@@ -200,7 +203,7 @@ public:
             do
             {
                 uint32 lowGUID = (*result)[0].GetUInt32();
-                Item* invItem = player->GetItemByGuid(MAKE_NEW_GUID(HighGuid::HIGHGUID_ITEM, 0, lowGUID));
+                Item* invItem = player->GetItemByGuid(MAKE_NEW_GUID(lowGUID, 0, HighGuid::HIGHGUID_ITEM));
                 if (invItem && invItem->IsEquipped())
                     player->_ApplyItemMods(invItem, invItem->GetSlot(), false);
                 ReforgeData& data = player->reforgeMap[lowGUID];
@@ -231,8 +234,8 @@ public:
     void OnSave(Player* player)  override
     {
         uint32 lowguid = player->GetGUIDLow();
-        SQLTransaction trans = CharacterDatabase.BeginTransaction();
-        trans->PAppend("DELETE FROM `custom_reforging` WHERE `Owner` = %u", lowguid);
+      //  SQLTransaction trans = CharacterDatabase.BeginTransaction();
+       // trans->PAppend("DELETE FROM `custom_reforging` WHERE `Owner` = %u", lowguid);
         if (!player->reforgeMap.empty())
         {
             // Only save items that are in inventory / bank / etc
@@ -244,12 +247,12 @@ public:
                     continue;
 
                 const ReforgeData& data = it2->second;
-                trans->PAppend("REPLACE INTO `custom_reforging` (`GUID`, `increase`, `decrease`, `stat_value`, `Owner`) VALUES (%u, %u, %u, %i, %u)", it2->first, data.increase, data.decrease, data.stat_value, lowguid);
+             //   trans->PAppend("UPDATE `custom_reforging` (`GUID`, `increase`, `decrease`, `stat_value`, `Owner`) VALUES (%u, %u, %u, %i, %u)", it2->first, data.increase, data.decrease, data.stat_value, lowguid);
             }
         }
 
-        if (trans->GetSize()) // basically never false
-            CharacterDatabase.CommitTransaction(trans);
+      /*  if (trans->GetSize()) // basically never false
+            CharacterDatabase.CommitTransaction(trans);*/
     }
 };
 
@@ -293,9 +296,9 @@ public:
             bool triggered;
         };
 
-        bool GossipHello(Player* player) 
+        void sGossipHello(Player* player) 
         {
-            return OnGossipHello(player, me);
+             OnGossipHello(player, me);
         }
 
         static bool OnGossipHello(Player* player, Creature* creature)
@@ -314,11 +317,11 @@ public:
             return true;
         }
 
-        bool GossipSelect(Player* player, uint32 /*menu_id*/, uint32 gossipListId) 
+        void sGossipSelect(Player* player, uint32 /*menu_id*/, uint32 gossipListId) 
         {
             uint32 sender = player->PlayerTalkClass->GetGossipOptionSender(gossipListId);
             uint32 action = player->PlayerTalkClass->GetGossipOptionAction(gossipListId);
-            return OnGossipSelect(player, me, sender, action);
+             OnGossipSelect(player, me, sender, action);
         }
 
         static bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 melt)
@@ -432,7 +435,7 @@ public:
                 case RESTORE:
                     // sender = item guidlow
                     {
-                        if (player->GetItemByGuid(MAKE_NEW_GUID(HighGuid::HIGHGUID_ITEM, 0, sender)))
+                        if (player->GetItemByGuid(MAKE_NEW_GUID(sender,0,HighGuid::HIGHGUID_ITEM)))
                         {
                             if (!player->reforgeMap.empty() && player->reforgeMap.find(sender) != player->reforgeMap.end())
                                 RemoveReforge(player, sender, true);
