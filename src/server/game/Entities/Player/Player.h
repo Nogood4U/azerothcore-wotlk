@@ -1184,7 +1184,7 @@ class Player : public Unit, public GridObject<Player>
         void GiveLevel(uint8 level);
 
         void InitStatsForLevel(bool reapplyMods = false);
-		ReforgeMapType reforgeMap; // reforgeMap[iGUID] = ReforgeData
+	ReforgeMapType reforgeMap; // reforgeMap[iGUID] = ReforgeData
         // Played Time Stuff
         time_t m_logintime;
         time_t m_Last_tick;

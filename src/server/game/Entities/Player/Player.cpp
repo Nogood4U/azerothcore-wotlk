@@ -19580,7 +19580,7 @@ void Player::SaveToDB(bool create, bool logout)
     outDebugValues();
 
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
-
+	sScriptMgr->OnPlayerSave(this);
     _SaveCharacter(create, trans);
 
     if (m_mailsUpdated)                                     //save mails only when needed

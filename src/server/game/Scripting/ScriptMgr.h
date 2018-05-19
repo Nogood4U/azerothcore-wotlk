@@ -824,6 +824,9 @@ class PlayerScript : public ScriptObject
         // Called during data loading
         virtual void OnLoadFromDB(Player* /*player*/) { };
 
+		// Called when a player is saved to db.
+		virtual void OnSave(Player* /*player*/) { }
+
         // Called when a player logs in.
         virtual void OnLogin(Player* /*player*/) { }
 
@@ -1228,7 +1231,8 @@ class ScriptMgr
         void OnPlayerEmote(Player* player, uint32 emote);
         void OnPlayerTextEmote(Player* player, uint32 textEmote, uint32 emoteNum, uint64 guid);
         void OnPlayerSpellCast(Player* player, Spell* spell, bool skipCheck);
-        void OnPlayerLogin(Player* player);
+		void OnPlayerSave(Player* player);
+		void OnPlayerLogin(Player* player);
         void OnPlayerLoadFromDB(Player* player);
         void OnPlayerLogout(Player* player);
         void OnPlayerCreate(Player* player);

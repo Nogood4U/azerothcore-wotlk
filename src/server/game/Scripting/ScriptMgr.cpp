@@ -1274,6 +1274,11 @@ void ScriptMgr::OnBeforePlayerUpdate(Player* player, uint32 p_time)
     FOREACH_SCRIPT(PlayerScript)->OnBeforeUpdate(player, p_time);
 }
 
+void ScriptMgr::OnPlayerSave(Player* player)
+{
+	FOREACH_SCRIPT(PlayerScript)->OnLogin(player);
+}
+
 void ScriptMgr::OnPlayerLogin(Player* player)
 {
     FOREACH_SCRIPT(PlayerScript)->OnLogin(player);
